@@ -1,57 +1,54 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Reactive;
 using ReactiveUI;
-using System.Windows.Input;
-using RNA.Models;
-using RNEA.Models;
-using AvaloniaApplication1.ViewModels;
+using AvaloniaApplication1.Models;
 
-namespace RomanNumberAvalonia_Lab4_.ViewModels
+namespace AvaloniaApplication1.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        string num1;
-        string num2;
-
-        string number;
-
+        string input = "";
+        bool is_print_result = false;
         public MainWindowViewModel()
         {
-            OnClickCommand = ReactiveCommand.Create<string, string>((str) => Greeting =  str);
-            ExecuteOperationCommand = ReactiveCommand.Create<string, string>((str) => ExecuteOperation = str);
-        }
+            ChangeInput = ReactiveCommand.Create((string x) => {
+                if (is_print_result)
+                {
+                    Input = "";
+                }
 
-        public string Greeting
+                is_print_result = false;
+
+                return Input += x;
+            });
+
+            Calculate = ReactiveCommand.Create(() => {
+                try
+                {
+                    is_print_result = true;
+                    Input = RomanNumberCalculator.Calculate(input).ToString();
+                }
+                catch (Exception ex)
+                {
+                    Input = "ERROR";
+                }
+            });
+        }
+        public string Input
         {
             set
             {
-                value = number + value;
-                this.RaiseAndSetIfChanged(ref number, value);
-               
+                this.RaiseAndSetIfChanged(ref input, value);
             }
+
             get
             {
-                return number;
+                return this.input;
             }
         }
-
-        public string ExecuteOperation
-        {
-            set
-            {
-                StringBuilder sb = new StringBuilder(number);
-                
-                this.RaiseAndSetIfChanged(ref number, value);
-
-            }
-            get
-            {
-                return number;
-            }
-        }
-
-        public ReactiveCommand<string, string> OnClickCommand { get; }
-         public ReactiveCommand<string, string> ExecuteOperationCommand { get; }
+        public ReactiveCommand<string, string> ChangeInput { get; }
+        public ReactiveCommand<Unit, Unit> Calculate { get; }
     }
 }
